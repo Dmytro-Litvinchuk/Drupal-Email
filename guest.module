@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * @file
+ * Contains guest.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function guest_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the guest module.
+    case 'help.page.guest':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Guest entity with contact form') . '</p>';
+      return $output;
+
+    default:
+  }
+}

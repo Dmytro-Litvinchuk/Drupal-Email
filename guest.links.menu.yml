@@ -1,0 +1,14 @@
+
+# Guest entity menu items definition
+entity.guest_entity.collection:
+  title: 'Guest entity list'
+  route_name: entity.guest_entity.collection
+  description: 'List Guest entity entities'
+  parent: system.admin_structure
+  weight: 100
+
+guest_entity.admin.structure.settings:
+  title: 'Guest entity settings'
+  description: 'Configure Guest entity entities'
+  route_name: guest_entity.settings
+  parent: system.admin_structure

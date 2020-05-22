@@ -1,0 +1,5 @@
+entity.guest_entity.add_form:
+  route_name: entity.guest_entity.add_form
+  title: 'Add Guest entity'
+  appears_on:
+    - entity.guest_entity.collection

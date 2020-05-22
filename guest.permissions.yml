@@ -1,0 +1,20 @@
+add guest entity entities:
+  title: 'Create new Guest entity entities'
+
+administer guest entity entities:
+  title: 'Administer Guest entity entities'
+  description: 'Allow to access the administration form to configure Guest entity entities.'
+  restrict access: true
+
+delete guest entity entities:
+  title: 'Delete Guest entity entities'
+
+edit guest entity entities:
+  title: 'Edit Guest entity entities'
+
+view published guest entity entities:
+  title: 'View published Guest entity entities'
+
+view unpublished guest entity entities:
+  title: 'View unpublished Guest entity entities'
+
