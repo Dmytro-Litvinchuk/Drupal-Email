@@ -5,7 +5,9 @@
  * Contains guest.module.
  */
 
+use Drupal\Core\Render\Markup;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Entity\EntityInterface;
 
 /**
  * Implements hook_help().
@@ -20,5 +22,74 @@ function guest_help($route_name, RouteMatchInterface $route_match) {
       return $output;
 
     default:
+  }
+}
+
+/**
+ * Need for own custom template.
+ * Because swiftmailer template using only in a theme folder.
+ * Implements hook_theme().
+ */
+function guest_theme($existing, $type, $theme, $path) {
+  return [
+    'custom_for_guest' => [
+      'variables' => [
+        'name' => NULL,
+        'body' => NULL,
+      ],
+    ],
+  ];
+}
+
+/**
+ * Sending email.
+ * Implements hook_mail().
+ */
+function guest_mail($key, &$message, $params) {
+  $options = [
+    'langcode' => $message['langcode'],
+  ];
+  switch ($key) {
+    // Only email with key "guest_message"
+    case 'guest_message':
+      $message['headers']['Content-Type'] = 'text/html; charset=UTF-8; format=flowed; delsp=yes';
+      $message['subject'] = t('Hello @user', ['@user' => $params['name']], $options);
+      //Swiftmailer twig $message['body'][] = Markup::create($params['message']);
+      // For using custom template in the module.
+      $body_data = [
+        '#theme' => 'custom_for_guest',
+        '#name' => $params['name'],
+        '#body' => Markup::create($params['message']),
+      ];
+      $message['body'][] = \Drupal::service('renderer')->render($body_data);
+      break;
+  }
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function guest_entity_insert(EntityInterface $entity) {
+  $name_entity = $entity->getEntityTypeId();
+  if ($name_entity == 'guest_entity') {
+    // See documentation Drupal MailManager.
+    $mailManager = \Drupal::service('plugin.manager.mail');
+    $module = 'guest';
+    $key = 'guest_message';
+    $to = $entity->get('mail')->getString();
+    $params['name'] = $entity->get('name')->getString();
+    // Get value from body field.
+    $params['message'] = $entity->get('text')->value;
+    $language_code = $entity->language()->getId();
+    $send_now = TRUE;
+    $mail = $mailManager->mail($module, $key, $to, $language_code, $params, NULL, $send_now);
+    if ($mail['result'] == TRUE) {
+      \Drupal::messenger()
+        ->addMessage(t('Your message has been sent.'));
+    }
+    else {
+      \Drupal::messenger()
+        ->addError(t('There was a problem sending your message and it was not sent.'));
+    }
   }
 }

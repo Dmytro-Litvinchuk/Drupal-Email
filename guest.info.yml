@@ -3,3 +3,7 @@ type: module
 description: 'Guest entity with contact form'
 core: 8.x
 package: 'Custom'
+
+dependencies:
+  - swiftmailer
+  - mailsystem

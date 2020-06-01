@@ -2,10 +2,8 @@
 
 namespace Drupal\guest\Form;
 
+use Drupal\Component\Serialization\Json;
 use Drupal\Core\Ajax\AjaxResponse;
-use Drupal\Core\Ajax\AlertCommand;
-use Drupal\Core\Ajax\CssCommand;
-use Drupal\Core\Ajax\RemoveCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
@@ -42,7 +40,7 @@ class GuestEntityForm extends ContentEntityForm {
   public function buildForm(array $form, FormStateInterface $form_state) {
     /* @var \Drupal\guest\Entity\GuestEntity $entity */
     $form = parent::buildForm($form, $form_state);
-    $form_id = $this->getFormId();
+    // Add ajax function to the submit.
     $form['actions']['submit']['#ajax'] = [
       'callback' => '::ajaxSave',
       'event' => 'click',
@@ -79,24 +77,36 @@ class GuestEntityForm extends ContentEntityForm {
           '%label' => $entity->label(),
         ]));
     }
-    //$form_state->setRedirect('entity.guest_entity.canonical', ['guest_entity' => $entity->id()]);
     // Change example_id to #example-id.
     $bad_form_id = $this->getFormId();
     $form_id = str_replace('_', '-', $bad_form_id);
     $selector = '#' . $form_id;
-    // Render html tag and link.
+    // Render some html.
     $build['message'] = [
       '#type' => 'html_tag',
       '#tag' => 'h3',
       '#value' => $message,
     ];
-    $build['examples_link'] = [
+    // Render link as button via modal window.
+    $build['link'] = [
       '#title' => $this
         ->t('Your message here'),
       '#type' => 'link',
       '#url' => Url::fromRoute('entity.guest_entity.canonical', ['guest_entity' => $entity->id()]),
+      '#options' => [
+        'attributes' => [
+          // use-ajax for modal window, button etc for view as button.
+          'class' => ['use-ajax', 'button', 'button--small'],
+          'data-dialog-type' => 'modal',
+          'data-dialog-options' => Json::encode([
+            'width' => 500,
+          ]),
+        ],
+      ],
+      // Required library for using ajax modal window.
+      '#attached' => ['library' => ['core/drupal.dialog.ajax']],
     ];
-    // Ajax magic.
+    // Ajax magic - replace form and render some new html.
     $ajax_response = new AjaxResponse();
     $ajax_response->addCommand(new ReplaceCommand($selector, $build));
     return $ajax_response;
